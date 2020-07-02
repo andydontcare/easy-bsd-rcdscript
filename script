@@ -1,0 +1,27 @@
+#!/bin/sh
+
+. /etc/rc.subr
+
+
+name=serviio
+desc="Serviio DLNA server"
+rcvar="${name}_enable"
+
+#command_interpreter="/usr/bin/su"
+#${name}_user="serviio"
+#command_interpreter="/bin/sh"
+command="/usr/local/serviio/bin/serviio.sh"
+#procname="/usr/local/serviio/bin/serviio.sh"
+pidfile=/var/run/${name}.pid
+#JAVA_HOME
+#JAVA
+
+
+start_cmd="serviio_start"
+
+serviio_start() {
+        /usr/sbin/daemon -u serviio -p ${pidfile} ${command}
+}
+
+load_rc_config $name
+run_rc_command "$1"
