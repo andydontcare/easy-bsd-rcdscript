@@ -2,25 +2,38 @@
 
 . /etc/rc.subr
 
-
 name=serviio
 desc="Serviio DLNA server"
-rcvar="${name}_enable"
-
-#command_interpreter="/usr/bin/su"
-#${name}_user="serviio"
-#command_interpreter="/bin/sh"
 command="/usr/local/serviio/bin/serviio.sh"
-#procname="/usr/local/serviio/bin/serviio.sh"
+
+rcvar="${name}_enable"
 pidfile=/var/run/${name}.pid
-#JAVA_HOME
-#JAVA
 
 
 start_cmd="serviio_start"
+stop_cmd="serviio_stop"
+status_cmd="serviio_status"
 
 serviio_start() {
         /usr/sbin/daemon -u serviio -p ${pidfile} ${command}
+}
+
+serviio_status() {
+        if [ -e ${pidfile} ]; then
+                srvcpid=`cat ${pidfile}`;
+                echo ${name} is running as pid ${srvcpid}
+        else
+                echo ${name} is not running.
+        fi
+}
+
+serviio_stop() {
+        if [ -e ${pidfile} ]; then
+                echo Stopping ${name} ...
+                kill `cat ${pidfile}`;
+        else
+                echo ${name} is not running.
+        fi
 }
 
 load_rc_config $name
