@@ -1,24 +1,27 @@
 #!/bin/sh
-
 . /etc/rc.subr
 
-name=serviio
-desc="Serviio DLNA server"
-command="/usr/local/serviio/bin/serviio.sh"
+#configure below
+name=servicename
+desc="Service description"
+command="/full/commandpath"
+user=runasuser
+
+#don't change anything past this point
 
 rcvar="${name}_enable"
 pidfile=/var/run/${name}.pid
 
+start_cmd="service_start"
+stop_cmd="service_stop"
+status_cmd="service_status"
 
-start_cmd="serviio_start"
-stop_cmd="serviio_stop"
-status_cmd="serviio_status"
-
-serviio_start() {
-        /usr/sbin/daemon -u serviio -p ${pidfile} ${command}
+service_start() {
+        echo Starting ${name}
+        /usr/sbin/daemon -u ${user} -p ${pidfile} ${command}
 }
 
-serviio_status() {
+service_status() {
         if [ -e ${pidfile} ]; then
                 srvcpid=`cat ${pidfile}`;
                 echo ${name} is running as pid ${srvcpid}
@@ -27,7 +30,7 @@ serviio_status() {
         fi
 }
 
-serviio_stop() {
+service_stop() {
         if [ -e ${pidfile} ]; then
                 echo Stopping ${name} ...
                 kill `cat ${pidfile}`;
