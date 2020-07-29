@@ -2,12 +2,13 @@
 . /etc/rc.subr
 
 #configure below
+
 name=servicename
 desc="Service description"
 command="/full/commandpath"
 user=runasuser
 
-#don't change anything past this point
+#don't change anything past this point unless you know what you're doing
 
 rcvar="${name}_enable"
 pidfile=/var/run/${name}.pid
@@ -15,13 +16,19 @@ pidfile=/var/run/${name}.pid
 start_cmd="service_start"
 stop_cmd="service_stop"
 status_cmd="service_status"
+#restart_cmd="service_restart"
 
 service_start() {
-        echo Starting ${name}
-        /usr/sbin/daemon -u ${user} -p ${pidfile} ${command}
+        if [ -e ${pidfile} ]; then
+                echo ${name} is already running.
+        else
+                echo Starting ${name}
+                /usr/sbin/daemon -u ${user} -p ${pidfile} ${command} > /dev/null 2>&1
+        fi
 }
 
 service_status() {
+                srvcpid=0
         if [ -e ${pidfile} ]; then
                 srvcpid=`cat ${pidfile}`;
                 echo ${name} is running as pid ${srvcpid}
@@ -32,8 +39,23 @@ service_status() {
 
 service_stop() {
         if [ -e ${pidfile} ]; then
-                echo Stopping ${name} ...
+                echo -n Stopping ${name} 
                 kill `cat ${pidfile}`;
+                while [ -e ${pidfile} ]
+                do
+                        echo -n "."
+                        sleep 1
+                done
+                echo "  Done."
+        else
+                echo ${name} is not running.
+        fi
+}
+
+service_restart() {
+        if [ -e ${pidfile} ]; then
+                service_stop
+                service_start
         else
                 echo ${name} is not running.
         fi
